@@ -1,0 +1,24 @@
+{
+  "name": "gamera",
+  "description": "Gamera Engine",
+  "version": "1.0.0",
+  "homepage": "http://ianmcdaniel.github.io/gamecore",
+  "author": {
+    "name": "Ian McDaniel"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ianmcdaniel/gamecore"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-jshint": "*",
+    "grunt-contrib-concat": "*",
+    "grunt-contrib-qunit": "*",
+    "phantomjs": "^1.9.12"
+  }
+}
