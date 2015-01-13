@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<htmlp>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <script src="../src/gamera.js"></script>
+
+
+
+  </head>
+  <body style="background:#fff;margin:0;padding:0;width:100%">
+  
+    
+    <canvas id="c" style="position:absolute;left:0;top:0;"></canvas>
+    <script>
+
+      var c = document.getElementsByTagName('canvas')[0];
+      c.width   = innerWidth;
+      c.height = innerHeight;
+      c.style.background = "#181c2e"
+      
+
+      G = new Gamera({
+        width         : c.width,
+        height        : c.height,
+        context       : c.getContext("2d")
+      })
+
+      
+
+      G.component("pos",{
+        x:0,
+        y:0,
+        width:0,
+        height:0
+      })
+
+      G.component("bouncy",{
+      })
+
+      G.component("moveable",{
+        xspeed:0,
+        yspeed:0,
+        constrain:[0,0,100,100]
+      })
+
+      G.component("controllable",{
+
+      })
+
+      G.component("collidable", {
+        breakable: false,
+        fatal:false
+      })
+
+      G.component("circle", {
+        color:"#ffffff",
+        render:function(ctx, entity){
+          var p = entity.get("pos");
+          ctx.beginPath();
+          ctx.fillStyle = this.color;
+          ctx.arc((p.width/2),(p.height/2), p.width/2, 0, Math.PI*2, true); 
+          ctx.closePath();
+          ctx.fill();
+        }
+      })         
+
+
+      G.component("rectangle", {
+        color:"#ffffff",
+        render:function(ctx, entity){
+          var p = entity.get("pos");
+          ctx.beginPath();
+          ctx.fillStyle = this.color;
+          ctx.rect(0,0,p.width,p.height);
+          ctx.closePath();
+          ctx.fill();
+        }
+      })      
+
+
+      G.component("render",{
+        init: function(){
+          this.components = Array.prototype.slice.call(arguments, 0);
+        }
+      })
+
+
+      
+
+      
+
+
+
+
+
+
+
+
+      G.entity("paddle", {
+        pos:{x:100,y:270,width:100,height:10},
+        collidable:{},
+        moveable:{},
+        controllable:{},
+        rectangle:{color:"#fff"},
+        render:["rectangle"]
+      })
+
+
+      G.entity("ball", {
+        pos:{x:100,y:200,width:20,height:20},
+        circle:{color:"#f0f"},
+        bouncy:{},
+        collidable:{},
+        moveable:{
+          xspeed:5,
+          yspeed:5
+        },
+        render:["circle"]
+      })
+
+    
+      
+      G.entity("top-wall", {
+        rectangle:{color:'red'},
+        pos:{x:0,y:0,width:300, height:10},
+        collidable:{},
+        render:["rectangle"]
+      })
+
+      G.entity("left-wall", {
+        rectangle:{color:'red'},
+        pos:{x:0,y:0,width:10, height:300},
+        collidable:{},
+        render:["rectangle"]
+      })
+
+      G.entity("right-wall", {
+        rectangle:{color:'red'},
+        pos:{x:300,y:0,width:10, height:300},
+        collidable:{},
+        render:["rectangle"]
+      })
+
+
+function initbricks() {
+  NROWS = 5;
+  NCOLS = 5;
+  BRICKWIDTH = (290/NCOLS) - 1;
+  BRICKHEIGHT = 20;
+  PADDING = 1;
+  OFFSETX = 10;
+  OFFSETY = 10
+
+  bricks = new Array(NROWS);
+  for (i=0; i < NROWS; i++) {
+    bricks[i] = new Array(NCOLS);
+    for (j=0; j < NCOLS; j++) {
+        G.entity("brick"+i+j, {
+          pos:{
+            x: (j*(BRICKWIDTH + PADDING)) + PADDING + OFFSETX,
+            y: (i*(BRICKHEIGHT + PADDING)) + PADDING+ OFFSETY,
+            width:BRICKWIDTH,
+            height:BRICKHEIGHT
+          },
+          collidable:{breakable:true},
+          rectangle:{color:"#00f"},
+          render:["rectangle"]
+        })
+
+    }
+  }
+}
+  
+
+
+initbricks()
+
+
+G.system("clear",{
+  order:0,
+  draw:function(){
+    this.game.get('context').clearRect(0,0, innerWidth,innerHeight);
+  }
+})
+
+
+
+G.system("control", {
+  
+  xdirection:0,
+  ydirection:0,
+
+  init:function(){
+    var self = this;
+    onkeydown = onkeyup = function(e){
+      var keyup = e.type == "keyup";
+      if (e.which == 37) self.xdirection = keyup ? 0 : -1;
+      if (e.which == 39) self.xdirection = keyup ? 0 : 1;
+      if (e.which == 38) self.ydirection = keyup ? 0 : -1;
+      if (e.which == 40) self.ydirection = keyup ? 0 : 1;
+    }
+  },
+
+  update:function(){
+    this.entities     = this.getEntities("controllable", "moveable");
+    this.entities.forEach(this.process.bind(this));
+  },
+  
+  process:function(e){
+    e.get("moveable").xspeed = 10 * this.xdirection
+    e.get("moveable").yspeed = 10 * this.ydirection
+  }
+})
+
+
+
+G.system("moveable", {
+  update: function(){
+    this.entities = this.game.getEntities("moveable","pos");
+    this.entities.forEach(this.process.bind(this));
+  },
+  process: function(e){
+    var m = e.get("moveable");
+    var p = e.get("pos");
+
+    p.y += m.yspeed;
+    p.x += m.xspeed;
+  }
+})
+
+
+
+G.system("collision", {
+  update:function(){
+    this.movables     = this.getEntities("moveable");
+    this.collidables  = this.getEntities("collidable");
+
+    this.movables.forEach(this.process.bind(this));
+  },
+  process:function(e){
+    var 
+      self = this,
+      hit  = false,
+      p    = e.get("pos"), 
+      m    = e.get("moveable");
+
+    this.collidables.forEach(function(ce){
+      if (hit || e == ce) return;
+      hit = self.hitTest(e,ce);
+    })
+
+    if (hit) { 
+      var he = hit.entity;
+
+
+      if (hit.direction.match(/left|right/)) {
+        m.xspeed = -m.xspeed
+      } else {
+        m.yspeed = -m.yspeed;
+      
+        if(he.get('controllable')) {
+          m.xspeed = 8 * ((p.x-(he.get('pos').x+he.get('pos').width/2))/he.get('pos').width);
+        }
+      }
+      if(hit.entity.get('collidable').breakable) {
+        this.game.removeEntity(hit.entity.id)
+      }
+    }
+  },
+
+  hitTest: function(e1, e2){
+    var
+      a = e1.get('pos'),
+      b = e2.get('pos'),
+      btm = b.y + b.height - a.y, 
+      top = a.y + a.height - b.y,
+      lft = a.x + a.width - b.x,
+      rgt = b.x + b.width - a.x,
+      
+      dir = 
+        (top < btm && top < lft && top < rgt) ? "top" :
+        (btm < top && btm < lft && btm < rgt) ? "bottom" : 
+        (lft < rgt && lft < top && lft < btm) ? "left" : "right";
+
+    if (a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y) {
+      return {'entity': e2, 'direction': dir}
+    }
+    return false;
+  }
+});
+
+
+
+
+
+
+G.system("render", {
+  update: function(){
+    this.entities = this.getEntities("render");
+  },
+  draw: function(){
+    var a = this.game.get('context');
+    this.entities.forEach(function(e){
+      var p = e.get("pos");
+      e.get("render").components.forEach(function(cmp){
+        a.save()
+        a.translate(p.x,p.y);
+        e.get(cmp).render(a, e)
+        a.restore();  
+      }.bind(this))
+    })
+  }
+})
+
+
+
+
+
+
+
+
+G.start();
+
+    </script>
+  </body>
+</html>
