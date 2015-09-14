@@ -36,7 +36,7 @@
       for(k in Object) c[k] = Object[k]
       return c;
     }
-  })
+  });
 
   var G = Object.extend({
 
@@ -47,7 +47,6 @@
       this.running    = false;
       
       this._attrs     = attrs || {};
-      this._cache     = {}
       P.forEach(function(p){p.call(this, this);}.bind(this));
     },
 
@@ -59,20 +58,19 @@
       var e = this.entities;
       if(typeof id == "object") {components=id; id=uid();}
       e[id] = new G.Entity(this, id, components);
-      this._store(e[id]);
+      //this._store(e[id]);
       this.trigger("entity:added", e[id]);
       return e[id];
     },
 
     removeEntity: function(id) {
+      G.Cache.remove(id);
       delete this.entities[id];
-      for(var k in this._cache) this._cache[k][id] && delete this._cache[k][id];
       this.trigger("entity:removed", id);
     },
 
     // create component
     component: function(id, methods) {
-      if(typeof id == "object") {methods = id; id = methods.id || uid();}
       var c = this.components[id] = G.Component.extend({id:id,game:this}, methods);
       this.trigger("component:added", c);
     },
@@ -98,10 +96,13 @@
 
     // find entities by component
     getEntities: function(){
-      var cid = Array.prototype.slice.call(arguments, 0).sort().join("."), c=this._cache;
+      var cid = Array.prototype.slice.call(arguments, 0).sort().join("."), 
+          c=G.Cache._cache;
       if(c[cid]) return values(c[cid]);
       c[cid] = {};
-      for(var e in this.entities) this._store(this.entities[e]);
+      for(var e in this.entities) {
+        G.Cache.update(this.entities[e]);
+      }
       return values(c[cid]);
     },
 
@@ -113,8 +114,7 @@
         this.trigger("start", this);
         (function gl(){
           self.systems.forEach(function(s){
-            s.update  && s.update.call(s);
-            s.draw    && s.draw.call(s);
+            s.update && s.update.call && s.update.call(s);
           });
           if(self.running) window.requestAnimationFrame(gl, c);
         })()
@@ -124,14 +124,6 @@
     stop: function(){
       this.running = false;
       this.trigger("stop", this);
-    },
-
-    _store: function(entity) {
-      for(var k in this._cache) {
-        var add = true;
-        k.split(".").forEach(function(c){if (!entity.components[c]) add=false;});
-        if(add) this._cache[k][entity.id] = entity;
-      }
     }
   })
 
@@ -145,11 +137,17 @@
       for(var c in components) this.add(c, components[c]);
     },
     get:function(c){
-      return this.components[c];
+      var 
+        i,
+        str = c.split("."),
+        obj = this.components;
+      for (i = 0; i < str.length; i++) obj = obj[str[i]];
+      return obj;
     },
     remove: function(c){
+      G.Cache.update(this);
       delete this.components[c];
-      for(var k in cache) if(k.match(c)) cache[k] && delete cache[k][this.id];
+      
     },
     add: function(c, a) {
       var gc = this.game.components;
@@ -161,6 +159,7 @@
           return new fn();
         }
       }.bind(this))(c, a);
+      G.Cache.update(this);
     }
   });
   
@@ -178,6 +177,21 @@
   });
 
   G.plugin = function(fn){P.push(fn);};
+
+  G.Cache = {
+    _cache:{},
+    update: function(entity) {
+      this.remove(entity.id);
+      for(var k in this._cache) {
+        var add = true;
+        k.split(".").forEach(function(c){if (!entity.components[c]) add=false;});
+        if(add) this._cache[k][entity.id] = entity;
+      }
+    },
+    remove: function(id){
+      for(var k in this._cache) this._cache[k][id] && delete this._cache[k][id];
+    }
+  }
 
   G.Events = {
     on:function(evt, fn){
@@ -201,5 +215,19 @@
   G.mixin(G.Events);
   G.Entity.mixin(G.Events);
   G.System.mixin(G.Events);
-  window.Gamera = G;
+
+  var root = this;
+  if (typeof define === 'function' && define.amd) {
+    define('Gamera', [], function() {
+      return G;
+    });
+  } else if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = G;
+    }
+    exports.Gamera = G;
+  } else {
+    root.Gamera = G;
+  }
+
 }());

@@ -143,43 +143,9 @@
       })
 
 
-function initbricks() {
-  NROWS = 5;
-  NCOLS = 5;
-  BRICKWIDTH = (290/NCOLS) - 1;
-  BRICKHEIGHT = 20;
-  PADDING = 1;
-  OFFSETX = 10;
-  OFFSETY = 10
-
-  bricks = new Array(NROWS);
-  for (i=0; i < NROWS; i++) {
-    bricks[i] = new Array(NCOLS);
-    for (j=0; j < NCOLS; j++) {
-        G.entity("brick"+i+j, {
-          pos:{
-            x: (j*(BRICKWIDTH + PADDING)) + PADDING + OFFSETX,
-            y: (i*(BRICKHEIGHT + PADDING)) + PADDING+ OFFSETY,
-            width:BRICKWIDTH,
-            height:BRICKHEIGHT
-          },
-          collidable:{breakable:true},
-          rectangle:{color:"#00f"},
-          render:["rectangle"]
-        })
-
-    }
-  }
-}
-  
-
-
-initbricks()
-
-
 G.system("clear",{
   order:0,
-  draw:function(){
+  update:function(){
     this.game.get('context').clearRect(0,0, innerWidth,innerHeight);
   }
 })
@@ -263,7 +229,7 @@ G.system("collision", {
           m.xspeed = 8 * ((p.x-(he.get('pos').x+he.get('pos').width/2))/he.get('pos').width);
         }
       }
-      if(hit.entity.get('collidable').breakable) {
+      if(hit.entity.get('collidable.breakable')) {
         this.game.removeEntity(hit.entity.id)
       }
     }
@@ -297,13 +263,11 @@ G.system("collision", {
 
 G.system("render", {
   update: function(){
-    this.entities = this.getEntities("render");
-  },
-  draw: function(){
+
     var a = this.game.get('context');
-    this.entities.forEach(function(e){
+    this.getEntities("render").forEach(function(e){
       var p = e.get("pos");
-      e.get("render").components.forEach(function(cmp){
+      e.get("render.components").forEach(function(cmp){
         a.save()
         a.translate(p.x,p.y);
         e.get(cmp).render(a, e)
@@ -317,6 +281,37 @@ G.system("render", {
 
 
 
+
+function initbricks() {
+  NROWS = 5;
+  NCOLS = 5;
+  BRICKWIDTH = (290/NCOLS) - 1;
+  BRICKHEIGHT = 20;
+  PADDING = 1;
+  OFFSETX = 10;
+  OFFSETY = 10
+
+  bricks = new Array(NROWS);
+  for (i=0; i < NROWS; i++) {
+    bricks[i] = new Array(NCOLS);
+    for (j=0; j < NCOLS; j++) {
+      G.entity("brick"+i+j, {
+        pos:{
+          x: (j*(BRICKWIDTH + PADDING)) + PADDING + OFFSETX,
+          y: (i*(BRICKHEIGHT + PADDING)) + PADDING+ OFFSETY,
+          width:BRICKWIDTH,
+          height:BRICKHEIGHT
+        },
+        collidable:{breakable:true},
+        rectangle:{color:"#00f"},
+        render:["rectangle"]
+      })
+    }
+  }
+}
+  
+
+G.on("start", initbricks);
 
 
 
