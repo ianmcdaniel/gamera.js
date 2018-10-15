@@ -20,7 +20,7 @@
   }
 
   var Object = extend((function(){}), {
-    
+
     mixin:function(o){
       var p = this.prototype.init, m = o.init;
       if(m) {
@@ -29,10 +29,7 @@
       }
       extend(this.prototype, o);
     },
-<<<<<<< HEAD
 
-=======
->>>>>>> comment
     extend: function(){
       var
         p = "prototype",
