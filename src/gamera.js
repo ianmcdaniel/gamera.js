@@ -1,3 +1,5 @@
+// Gamera engine
+
 (function () {
   var P=[]; //Plugins
 
@@ -18,7 +20,6 @@
   }
 
   var Object = extend((function(){}), {
-    
     mixin:function(o){
       var p = this.prototype.init, m = o.init;
       if(m) {
@@ -41,7 +42,6 @@
   });
 
   var G = Object.extend({
-
     init:function(attrs){
       this.entities   = {};
       this.components = {};
