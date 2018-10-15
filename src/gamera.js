@@ -19,16 +19,8 @@
     return d;
   }
 
-
   var Object = extend((function(){}), {
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-=======
->>>>>>> small fix
-=======
-
->>>>>>> small fix
     mixin:function(o){
       var p = this.prototype.init, m = o.init;
       if(m) {
@@ -229,6 +221,7 @@
   }
 
   G.mixin(G.Events);
+
   G.Entity.mixin(G.Events);
 
   G.System.mixin(G.Events);
