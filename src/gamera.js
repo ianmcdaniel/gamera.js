@@ -1,3 +1,5 @@
+// Gamera engine
+
 (function () {
   var P=[]; //Plugins
 
@@ -25,9 +27,9 @@
         delete o.init;
       }
       extend(this.prototype, o);
-    },    
+    },
     extend: function(){
-      var 
+      var
         p = "prototype",
         c = function(){return this.init && this.init.apply(this, arguments)},
         s = function(){ this.constructor = c;};
@@ -45,7 +47,7 @@
       this.components = {};
       this.systems    = [];
       this.running    = false;
-      
+
       this._attrs     = attrs || {};
       P.forEach(function(p){p.call(this, this);}.bind(this));
     },
@@ -96,7 +98,7 @@
 
     // find entities by component
     getEntities: function(){
-      var cid = Array.prototype.slice.call(arguments, 0).sort().join("."), 
+      var cid = Array.prototype.slice.call(arguments, 0).sort().join("."),
           c=G.Cache._cache;
       if(c[cid]) return values(c[cid]);
       c[cid] = {};
@@ -137,7 +139,7 @@
       for(var c in components) this.add(c, components[c]);
     },
     get:function(c){
-      var 
+      var
         i,
         str = c.split("."),
         obj = this.components;
@@ -147,7 +149,7 @@
     remove: function(c){
       G.Cache.update(this);
       delete this.components[c];
-      
+
     },
     add: function(c, a) {
       var gc = this.game.components;
@@ -162,7 +164,7 @@
       G.Cache.update(this);
     }
   });
-  
+
   G.System = G.Object.extend({
     getEntity: function(){
       return this.game.getEntity.apply(this.game, arguments);
