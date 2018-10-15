@@ -21,10 +21,7 @@
 
 
   var Object = extend((function(){}), {
-<<<<<<< HEAD
 
-=======
->>>>>>> small fix
     mixin:function(o){
       var p = this.prototype.init, m = o.init;
       if(m) {
