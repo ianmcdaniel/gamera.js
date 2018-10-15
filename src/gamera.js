@@ -179,7 +179,9 @@
   G.plugin = function(fn){P.push(fn);};
 
   G.Cache = {
+
     _cache:{},
+
     update: function(entity) {
       this.remove(entity.id);
       for(var k in this._cache) {
@@ -188,6 +190,7 @@
         if(add) this._cache[k][entity.id] = entity;
       }
     },
+
     remove: function(id){
       for(var k in this._cache) this._cache[k][id] && delete this._cache[k][id];
     }
@@ -204,7 +207,7 @@
       if(!this.events || !this.events[evt]) return;
       (fn) ? this.events[evt].splice(this.events[evt].indexOf(fn), 1) : this.events[evt] = [];
     },
-    
+
     trigger:function(evt){
       var args = Array.prototype.slice.call(arguments, 1);
       if(!this.events || !this.events[evt]) return;
