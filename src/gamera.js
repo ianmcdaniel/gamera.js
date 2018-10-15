@@ -1,3 +1,5 @@
+// Gamera engine
+
 (function () {
   var P=[]; //Plugins
 
@@ -27,7 +29,10 @@
       }
       extend(this.prototype, o);
     },
+<<<<<<< HEAD
 
+=======
+>>>>>>> comment
     extend: function(){
       var
         p = "prototype",
