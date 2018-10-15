@@ -225,7 +225,6 @@
   }
 
   G.mixin(G.Events);
-
   G.Entity.mixin(G.Events);
 
   G.System.mixin(G.Events);
