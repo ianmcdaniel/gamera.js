@@ -199,10 +199,12 @@
       this.events[evt] = this.events[evt] || [];
       this.events[evt].push(fn);
     },
+
     off:function(evt, fn){
       if(!this.events || !this.events[evt]) return;
       (fn) ? this.events[evt].splice(this.events[evt].indexOf(fn), 1) : this.events[evt] = [];
     },
+    
     trigger:function(evt){
       var args = Array.prototype.slice.call(arguments, 1);
       if(!this.events || !this.events[evt]) return;
@@ -215,7 +217,7 @@
   G.mixin(G.Events);
 
   G.Entity.mixin(G.Events);
-  
+
   G.System.mixin(G.Events);
 
   var root = this;
