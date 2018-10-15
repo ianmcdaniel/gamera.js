@@ -1,3 +1,5 @@
+// Gamera engine
+
 (function () {
   var P=[]; //Plugins
 
