@@ -20,8 +20,6 @@
   }
 
 
-  
-
   var Object = extend((function(){}), {
 <<<<<<< HEAD
 
@@ -35,10 +33,7 @@
       }
       extend(this.prototype, o);
     },
-<<<<<<< HEAD
 
-=======
->>>>>>> comment
     extend: function(){
       var
         p = "prototype",
